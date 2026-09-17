@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('리뷰 작성', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <h1 class="page-title"
+      th:text="${mode == 'edit'} ? '리뷰 수정' : '리뷰 등록'">리뷰 등록</h1>
+
+  <form class="review-form" method="post"
+        th:action="${mode == 'edit'} ? @{/reviews/{id}(id=${reviewId})} : @{/reviews}"
+        th:object="${command}" enctype="multipart/form-data">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <p class="form-error" th:if="${#fields.hasGlobalErrors()}"
+       th:text="${#fields.globalErrors()}"></p>
+
+    <div class="field">
+      <label class="field__label" for="storeName">가게명</label>
+      <input class="field__input" type="text" id="storeName" th:field="*{storeName}">
+      <p class="form-error" th:if="${#fields.hasErrors('storeName')}"
+         th:errors="*{storeName}"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="region">지역</label>
+      <select class="field__select" id="region" th:field="*{region}">
+        <option th:each="r : ${regions}" th:value="${r}" th:text="${r}"></option>
+      </select>
+      <p class="form-error" th:if="${#fields.hasErrors('region')}"
+         th:errors="*{region}"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="rating">별점</label>
+      <select class="field__select" id="rating" th:field="*{rating}">
+        <option th:each="r : ${#numbers.sequence(ratingMin, ratingMax)}"
+                th:value="${r}" th:text="${r + '점'}"></option>
+      </select>
+      <p class="form-error" th:if="${#fields.hasErrors('rating')}"
+         th:errors="*{rating}"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="title">제목</label>
+      <input class="field__input" type="text" id="title" th:field="*{title}">
+      <p class="form-error" th:if="${#fields.hasErrors('title')}"
+         th:errors="*{title}"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="content">내용</label>
+      <textarea class="field__textarea" id="content" th:field="*{content}"></textarea>
+      <p class="form-error" th:if="${#fields.hasErrors('content')}"
+         th:errors="*{content}"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="images">사진</label>
+      <input class="field__input field__input--file" type="file" id="images"
+             name="images" multiple accept="image/*">
+    </div>
+
+    <div class="review-form__actions">
+      <button class="btn btn--primary" type="submit"
+              th:text="${mode == 'edit'} ? '수정' : '등록'">등록</button>
+      <a class="btn btn--secondary"
+         th:href="${mode == 'edit'} ? @{/reviews/{id}(id=${reviewId})} : @{/reviews}"
+         th:text="${mode == 'edit'} ? '취소' : '목록'">목록</a>
+    </div>
+  </form>
+</main>
+</body>
+</html>

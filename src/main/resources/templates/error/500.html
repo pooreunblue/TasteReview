@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('일시적인 오류', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <section class="error-page">
+    <p class="error-page__code">500</p>
+    <h1 class="error-page__title">일시적인 오류가 발생했습니다</h1>
+    <p class="error-page__text">잠시 후 다시 시도해 주세요.</p>
+    <a class="btn btn--primary" th:href="@{/reviews}">리뷰 목록으로</a>
+  </section>
+</main>
+</body>
+</html>

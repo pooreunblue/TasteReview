@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('사진이 너무 큽니다', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <section class="error-page">
+    <p class="error-page__code">400</p>
+    <h1 class="error-page__title">사진 용량이 너무 큽니다</h1>
+    <p class="error-page__text">사진을 더 작게 줄이거나 개수를 줄여 다시 시도해 주세요.</p>
+    <a class="btn btn--primary" th:href="@{/reviews/new}">리뷰 다시 작성하기</a>
+  </section>
+</main>
+</body>
+</html>

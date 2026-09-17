@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('리뷰 상세', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <article class="review-detail">
+    <div class="review-detail__header">
+      <div class="review-detail__meta">
+        <span class="badge" th:text="${detail.region()}">지역</span>
+        <span class="rating"
+              th:text="${'★'.repeat(detail.rating()) + '☆'.repeat(ratingMax > detail.rating() ? ratingMax - detail.rating() : 0)}">별점</span>
+        <span class="rating__value" th:text="${detail.rating() + '점'}">4점</span>
+        <span class="review-detail__store" th:text="${detail.storeName()}">가게명</span>
+      </div>
+      <h1 class="review-detail__title" th:text="${detail.title()}">제목</h1>
+      <p class="review-detail__sub">
+        <span th:text="${detail.authorNickname()}">작성자</span>
+        <span th:text="${' · ' + #temporals.format(detail.createdAt(), 'yyyy-MM-dd HH:mm')}"></span>
+        <span th:if="${detail.updatedAt() != null && !detail.updatedAt().isEqual(detail.createdAt())}"
+              th:text="${' · 수정됨 ' + #temporals.format(detail.updatedAt(), 'yyyy-MM-dd HH:mm')}"></span>
+      </p>
+    </div>
+
+    <div class="review-detail__actions" th:if="${detail.canModify()}">
+      <a class="btn btn--secondary" th:href="@{/reviews/{id}/edit(id=${detail.id()})}">수정</a>
+      <a class="btn btn--danger" th:href="@{/reviews/{id}/delete(id=${detail.id()})}">삭제</a>
+    </div>
+
+    <p class="review-detail__content" th:text="${detail.content()}">본문</p>
+
+    <div class="review-detail__gallery" th:if="${!detail.images().isEmpty()}">
+      <figure class="review-detail__figure" th:each="img : ${detail.images()}">
+        <img class="review-detail__img" loading="lazy"
+             th:src="@{/images/{id}(id=${img.id()})}"
+             th:alt="${'리뷰 사진 - ' + img.originalFileName()}">
+      </figure>
+    </div>
+  </article>
+
+  <section class="comments">
+    <h2 class="comments__title">댓글</h2>
+    <p class="form-error" th:if="${commentError}" th:text="${commentError}"></p>
+
+    <form class="comment-form" method="post"
+          th:action="@{/reviews/{id}/comments(id=${detail.id()})}"
+          th:if="${isAuthenticated}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <div class="field">
+        <label class="field__label" for="comment-content">댓글</label>
+        <textarea class="field__textarea" id="comment-content" name="content"
+                  maxlength="500" required></textarea>
+      </div>
+      <button class="btn btn--primary" type="submit">댓글 등록</button>
+    </form>
+    <p class="comments__login-notice" th:unless="${isAuthenticated}">
+      <a th:href="@{/login}">로그인</a>하면 댓글을 남길 수 있습니다.
+    </p>
+
+    <ul class="comments__list" th:if="${!detail.comments().isEmpty()}">
+      <li class="comment" th:each="c : ${detail.comments().content}">
+        <div class="comment__header">
+          <span class="comment__author" th:text="${c.authorNickname()}">작성자</span>
+          <time class="comment__time"
+                th:text="${#temporals.format(c.createdAt(), 'yyyy-MM-dd HH:mm')}"></time>
+          <form class="comment__delete-form" method="post" th:if="${c.deletable()}"
+                th:action="@{/reviews/{reviewId}/comments/{commentId}/delete(reviewId=${detail.id()}, commentId=${c.id()})}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="comment__delete" type="submit">삭제</button>
+          </form>
+        </div>
+        <p class="comment__content" th:text="${c.content()}">댓글 내용</p>
+      </li>
+    </ul>
+    <p class="comments__empty" th:if="${detail.comments().isEmpty()}">아직 댓글이 없습니다.</p>
+
+    <nav class="pagination" th:if="${detail.comments().totalPages > 1}"
+         aria-label="댓글 페이지">
+      <a class="pagination__link"
+         th:each="i : ${#numbers.sequence(0, detail.comments().totalPages - 1)}"
+         th:href="@{/reviews/{id}(id=${detail.id()}, page=${i})}"
+         th:text="${i + 1}"
+         th:classappend="${i == detail.comments().number ? 'pagination__link--current' : ''}">1</a>
+    </nav>
+  </section>
+</main>
+</body>
+</html>

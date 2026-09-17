@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('리뷰 목록', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <div class="page-head">
+    <h1 class="page-title">리뷰 목록</h1>
+    <a class="btn btn--primary" th:if="${isAuthenticated}"
+       th:href="@{/reviews/new}">리뷰 등록</a>
+  </div>
+
+  <form class="search-form" method="get" th:action="@{/reviews}">
+    <div class="field">
+      <label class="field__label" for="keyword">키워드</label>
+      <input class="field__input" type="text" id="keyword" name="keyword"
+             th:value="${keyword}">
+    </div>
+    <div class="field">
+      <label class="field__label" for="region">지역</label>
+      <select class="field__select" id="region" name="region">
+        <option value="">전체</option>
+        <option th:each="r : ${regions}" th:value="${r}" th:text="${r}"
+                th:selected="${r == region}"></option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field__label" for="minRating">별점</label>
+      <select class="field__select" id="minRating" name="minRating">
+        <option value="">전체</option>
+        <option th:each="r : ${#numbers.sequence(ratingMin, ratingMax)}"
+                th:value="${r}" th:text="${r + '점 이상'}"
+                th:selected="${minRating == r}"></option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field__label" for="sort">정렬</label>
+      <select class="field__select" id="sort" name="sort">
+        <option value="latest" th:selected="${sort == null or sort == 'latest'}">최신순</option>
+        <option value="rating" th:selected="${sort == 'rating'}">별점순</option>
+      </select>
+    </div>
+    <div class="search-form__actions">
+      <button class="btn btn--primary" type="submit">검색</button>
+    </div>
+  </form>
+
+  <th:block th:if="${!reviews.isEmpty()}">
+    <div class="review-grid">
+      <article class="review-card" th:each="review : ${reviews.content}">
+        <a class="review-card__link" th:href="@{/reviews/{id}(id=${review.id()})}">
+          <div class="review-card__image">
+            <img class="review-card__img" loading="lazy"
+                 th:if="${review.representativeImageId() != null}"
+                 th:src="@{/images/{id}(id=${review.representativeImageId()})}"
+                 th:alt="${'리뷰 사진 - ' + review.title()}">
+            <p class="review-card__placeholder"
+               th:unless="${review.representativeImageId() != null}">이미지 없음</p>
+          </div>
+          <div class="review-card__body">
+            <div class="review-card__meta">
+              <span class="badge" th:text="${review.region()}">지역</span>
+              <span class="rating"
+                    th:text="${'★'.repeat(review.rating()) + '☆'.repeat(ratingMax > review.rating() ? ratingMax - review.rating() : 0)}">별점</span>
+              <span class="rating__value"
+                    th:text="${review.rating() + '점'}">4점</span>
+            </div>
+            <h2 class="review-card__title" th:text="${review.title()}">제목</h2>
+            <p class="review-card__store" th:text="${review.storeName()}">가게명</p>
+            <p class="review-card__sub">
+              <span th:text="${review.authorNickname()}">작성자</span>
+              <span th:text="${' · ' + #temporals.format(review.createdAt(), 'yyyy-MM-dd')}"></span>
+              <span th:if="${review.commentCount() > 0}"
+                    th:text="${' · 댓글 ' + review.commentCount() + '개'}"></span>
+            </p>
+          </div>
+        </a>
+      </article>
+    </div>
+
+    <nav class="pagination" th:if="${reviews.totalPages > 1}" aria-label="페이지">
+      <a class="pagination__link"
+         th:each="i : ${#numbers.sequence(0, reviews.totalPages - 1)}"
+         th:href="@{/reviews(keyword=${keyword}, region=${region}, minRating=${minRating}, sort=${sort}, page=${i})}"
+         th:text="${i + 1}"
+         th:classappend="${i == reviews.number ? 'pagination__link--current' : ''}">1</a>
+    </nav>
+  </th:block>
+
+  <div class="empty-state" th:if="${reviews.isEmpty()}">
+    <p class="empty-state__text">조건에 맞는 리뷰가 없습니다.</p>
+    <a class="btn btn--secondary" th:href="@{/reviews}">전체 리뷰 보기</a>
+  </div>
+</main>
+</body>
+</html>

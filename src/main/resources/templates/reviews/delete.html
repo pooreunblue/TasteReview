@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('리뷰 삭제', ~{::main})}">
+<head><title></title></head>
+<body>
+<main class="page-main">
+  <section class="delete-confirm">
+    <h1 class="page-title">리뷰 삭제</h1>
+    <p class="delete-confirm__text">
+      <span th:text="${storeName}"></span> -
+      <span th:text="${title}"></span>
+      리뷰를 삭제할까요? 삭제하면 사진과 댓글도 함께 사라지며 되돌릴 수 없습니다.
+    </p>
+    <form class="delete-confirm__form" method="post"
+          th:action="@{/reviews/{id}/delete(id=${reviewId})}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button class="btn btn--danger" type="submit">삭제</button>
+      <a class="btn btn--secondary" th:href="@{/reviews/{id}(id=${reviewId})}">취소</a>
+    </form>
+  </section>
+</main>
+</body>
+</html>
